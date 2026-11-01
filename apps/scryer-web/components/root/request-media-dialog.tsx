@@ -48,7 +48,11 @@ import {
   requestMediaLeaseOptionId,
   selectorId,
 } from "@/lib/utils/dom-ids";
-import { Input, integerInputProps, sanitizeDigits } from "@/components/ui/input";
+import {
+  Input,
+  integerInputProps,
+  sanitizeDigits,
+} from "@/components/ui/input";
 import { LoadingMark } from "@/components/common/loading-mark";
 
 /// How long the dialog waits after the requester stops changing the request
@@ -138,9 +142,7 @@ function RequestPreflightBanner({
     >
       <Icon className="mt-0.5 h-4 w-4 shrink-0" />
       <div className="space-y-1">
-        <p className="font-semibold">
-          {title}
-        </p>
+        <p className="font-semibold">{title}</p>
         {body ? <p className="text-[13px] leading-5">{body}</p> : null}
       </div>
     </div>
@@ -173,9 +175,10 @@ export function RequestMediaDialog({
   const t = useTranslate();
   const [libraryId, setLibraryId] = React.useState("");
   const [qualityProfileId, setQualityProfileId] = React.useState("");
-  const [monitorType, setMonitorType] = React.useState<MetadataCatalogMonitorType>(
-    () => defaultMonitorTypeForFacet(facet),
-  );
+  const [monitorType, setMonitorType] =
+    React.useState<MetadataCatalogMonitorType>(() =>
+      defaultMonitorTypeForFacet(facet),
+    );
   const [monitorSelection, setMonitorSelection] =
     React.useState<MonitorSelectionDraft>(EMPTY_MONITOR_SELECTION);
   const [monitorSelectionLoading, setMonitorSelectionLoading] =
@@ -183,9 +186,8 @@ export function RequestMediaDialog({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [leaseChoice, setLeaseChoice] = React.useState<LeaseChoice>("forever");
   const [customLeaseDays, setCustomLeaseDays] = React.useState(30);
-  const [preflight, setPreflight] = React.useState<RequestPreflightResult | null>(
-    null,
-  );
+  const [preflight, setPreflight] =
+    React.useState<RequestPreflightResult | null>(null);
   const client = useClient();
 
   React.useEffect(() => {
@@ -196,7 +198,13 @@ export function RequestMediaDialog({
         "",
     );
     setQualityProfileId("");
-    setMonitorType(defaultMonitorTypeForFacet(facet, requestableLibraries.find((l) => l.isDefault)?.defaultMonitorType ?? requestableLibraries[0]?.defaultMonitorType));
+    setMonitorType(
+      defaultMonitorTypeForFacet(
+        facet,
+        requestableLibraries.find((l) => l.isDefault)?.defaultMonitorType ??
+          requestableLibraries[0]?.defaultMonitorType,
+      ),
+    );
     setMonitorSelection(EMPTY_MONITOR_SELECTION);
     setMonitorSelectionLoading(false);
     setIsSubmitting(false);
@@ -213,21 +221,31 @@ export function RequestMediaDialog({
         ? clampRequestLeaseDays(customLeaseDays)
         : Number(leaseChoice);
 
-  const selectedLibrary = requestableLibraries.find((library) => library.id === libraryId) ?? null;
+  const selectedLibrary =
+    requestableLibraries.find((library) => library.id === libraryId) ?? null;
   const canRequestMonitorType = true;
-  const monitorOptions: Array<{ value: MetadataCatalogMonitorType; label: string }> = facet === "MOVIE" ? [
-    { value: "MONITORED", label: t("search.monitorType.monitored") },
-    { value: "UNMONITORED", label: t("search.monitorType.unmonitored") },
-  ] : [
-    { value: "FUTURE_EPISODES", label: t("search.monitorType.futureEpisodes") },
-    {
-      value: "MISSING_AND_FUTURE_EPISODES",
-      label: t("search.monitorType.missingAndFutureEpisodes"),
-    },
-    { value: "ALL_EPISODES", label: t("search.monitorType.allEpisodes") },
-    { value: "NONE", label: t("search.monitorType.none") },
-    { value: "ADVANCED", label: t("search.monitorType.advanced") },
-  ];
+  const monitorOptions: Array<{
+    value: MetadataCatalogMonitorType;
+    label: string;
+  }> =
+    facet === "MOVIE"
+      ? [
+          { value: "MONITORED", label: t("search.monitorType.monitored") },
+          { value: "UNMONITORED", label: t("search.monitorType.unmonitored") },
+        ]
+      : [
+          {
+            value: "FUTURE_EPISODES",
+            label: t("search.monitorType.futureEpisodes"),
+          },
+          {
+            value: "MISSING_AND_FUTURE_EPISODES",
+            label: t("search.monitorType.missingAndFutureEpisodes"),
+          },
+          { value: "ALL_EPISODES", label: t("search.monitorType.allEpisodes") },
+          { value: "NONE", label: t("search.monitorType.none") },
+          { value: "ADVANCED", label: t("search.monitorType.advanced") },
+        ];
   // Same rule as the add dialog: the picker (and its one metadata query) only
   // exists while ADVANCED is the live choice.
   const advancedSelected = canRequestMonitorType && monitorType === "ADVANCED";
@@ -245,7 +263,9 @@ export function RequestMediaDialog({
         ? [selectedLibrary.requestQualityProfileDefaultId]
         : [];
     return requestProfileIds.map((profileId) => {
-      const profile = qualityProfileOptions.find((option) => option.id === profileId);
+      const profile = qualityProfileOptions.find(
+        (option) => option.id === profileId,
+      );
       return {
         id: profileId,
         name: profile?.name ?? profileId,
@@ -289,9 +309,13 @@ export function RequestMediaDialog({
         requestedLeaseDays: requestedLeaseDays ?? undefined,
       });
       void client
-        .query(previewMyRequestDecisionQuery, { input }, {
-          requestPolicy: "network-only",
-        })
+        .query(
+          previewMyRequestDecisionQuery,
+          { input },
+          {
+            requestPolicy: "network-only",
+          },
+        )
         .toPromise()
         .then(({ data, error }) => {
           if (cancelled) return;
@@ -366,7 +390,11 @@ export function RequestMediaDialog({
         id="request-media-dialog"
         className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-5xl"
       >
-        <CatalogActionDialogSummary result={result} facet={facet} mode="request" />
+        <CatalogActionDialogSummary
+          result={result}
+          facet={facet}
+          mode="request"
+        />
 
         <div className="space-y-6 p-5 sm:p-7">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -376,16 +404,32 @@ export function RequestMediaDialog({
               </span>
               <Select
                 value={selectedLibrary?.id || ""}
-                onValueChange={(id) => { setLibraryId(id); setMonitorType(defaultMonitorTypeForFacet(facet, requestableLibraries.find((l) => l.id === id)?.defaultMonitorType)); setMonitorSelection(EMPTY_MONITOR_SELECTION); }}
+                onValueChange={(id) => {
+                  setLibraryId(id);
+                  setMonitorType(
+                    defaultMonitorTypeForFacet(
+                      facet,
+                      requestableLibraries.find((l) => l.id === id)
+                        ?.defaultMonitorType,
+                    ),
+                  );
+                  setMonitorSelection(EMPTY_MONITOR_SELECTION);
+                }}
                 disabled={isSubmitting || requestableLibraries.length <= 1}
               >
-                <SelectTrigger id="request-media-library" className="h-12 w-full">
+                <SelectTrigger
+                  id="request-media-library"
+                  className="h-12 w-full"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {requestableLibraries.map((library) => (
                     <SelectItem
-                      id={selectorId("request-media-library-option", library.id)}
+                      id={selectorId(
+                        "request-media-library-option",
+                        library.id,
+                      )}
                       key={library.id}
                       value={library.id}
                     >
@@ -450,7 +494,10 @@ export function RequestMediaDialog({
                   <SelectContent>
                     {monitorOptions.map((option) => (
                       <SelectItem
-                        id={mediaRequestMonitorOptionId("request", option.value)}
+                        id={mediaRequestMonitorOptionId(
+                          "request",
+                          option.value,
+                        )}
                         key={option.value}
                         value={option.value}
                       >
@@ -471,7 +518,10 @@ export function RequestMediaDialog({
                 onValueChange={(value) => setLeaseChoice(value as LeaseChoice)}
                 disabled={isSubmitting}
               >
-                <SelectTrigger id={REQUEST_MEDIA_LEASE_ID} className="h-12 w-full">
+                <SelectTrigger
+                  id={REQUEST_MEDIA_LEASE_ID}
+                  className="h-12 w-full"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -544,38 +594,38 @@ export function RequestMediaDialog({
             />
           ) : null}
 
-        <DialogFooter className="items-stretch gap-3 sm:items-center">
-          <Button
-            id="request-media-cancel"
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-            className="h-12 px-8"
-          >
-            {t("label.cancel")}
-          </Button>
-          <Button
-            id="request-media-submit"
-            type="button"
-            onClick={() => void handleSubmit()}
-            disabled={
-              isSubmitting ||
-              !selectedLibrary ||
-              !qualityProfileId ||
-              (canRequestMonitorType && !monitorType) ||
-              advancedBlocksSubmit
-            }
-            className="h-12 gap-2 bg-primary px-8 text-primary-foreground hover:bg-primary/90"
-          >
-            {isSubmitting ? (
-              <LoadingMark className="h-4 w-4" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            {isSubmitting ? t("search.requesting") : t("search.request")}
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="items-stretch gap-3 sm:items-center">
+            <Button
+              id="request-media-cancel"
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+              className="h-12 px-8"
+            >
+              {t("label.cancel")}
+            </Button>
+            <Button
+              id="request-media-submit"
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={
+                isSubmitting ||
+                !selectedLibrary ||
+                !qualityProfileId ||
+                (canRequestMonitorType && !monitorType) ||
+                advancedBlocksSubmit
+              }
+              className="h-12 gap-2 bg-primary px-8 text-primary-foreground hover:bg-primary/90"
+            >
+              {isSubmitting ? (
+                <LoadingMark className="h-4 w-4" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {isSubmitting ? t("search.requesting") : t("search.request")}
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>

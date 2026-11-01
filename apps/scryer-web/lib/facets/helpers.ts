@@ -19,8 +19,15 @@ export function viewFromFacet(facetId: Facet): ViewId {
   return (def?.viewId ?? "movies") as ViewId;
 }
 
-export function defaultMonitorTypeForFacet(facetId: Facet, saved?: string | null): MetadataCatalogMonitorType {
-  return resolveDefaultMonitorType(facetId, saved, facetById(facetId)?.defaultMonitorType ?? "MONITORED") as MetadataCatalogMonitorType;
+export function defaultMonitorTypeForFacet(
+  facetId: Facet,
+  saved?: string | null,
+): MetadataCatalogMonitorType {
+  return resolveDefaultMonitorType(
+    facetId,
+    saved,
+    facetById(facetId)?.defaultMonitorType ?? "MONITORED",
+  ) as MetadataCatalogMonitorType;
 }
 
 export function facetFromView(viewId: string): Facet | undefined {

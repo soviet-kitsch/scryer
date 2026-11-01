@@ -12,13 +12,22 @@ const webRoot = path.resolve(import.meta.dirname, "../..");
 
 // Load the real module without a browser: transpile local files on demand and
 // allow narrow context, UI, and hook overrides for input and dispatch tests.
-function loadGlobalSearch(extraOverrides: Record<string, unknown> = {}): typeof GlobalSearch {
+function loadGlobalSearch(
+  extraOverrides: Record<string, unknown> = {},
+): typeof GlobalSearch {
   const overrides: Record<string, unknown> = {
-    "@/lib/context/translate-context": { useTranslate: () => (key: string) => key },
+    "@/lib/context/translate-context": {
+      useTranslate: () => (key: string) => key,
+    },
     "@/lib/context/global-status-context": { useGlobalStatus: () => () => {} },
-    "@/lib/hooks/use-settings-subscription": { useSettingsSubscription: () => {} },
+    "@/lib/hooks/use-settings-subscription": {
+      useSettingsSubscription: () => {},
+    },
     "@/components/root/catalog-add-toast": { showCatalogAddToast: () => {} },
-    "@/lib/graphql/urql-client": { isAbortError: () => false, makeAbortableFetch: () => fetch },
+    "@/lib/graphql/urql-client": {
+      isAbortError: () => false,
+      makeAbortableFetch: () => fetch,
+    },
     ...extraOverrides,
   };
   const cache = new Map<string, { exports: Record<string, unknown> }>();
@@ -41,21 +50,34 @@ function loadGlobalSearch(extraOverrides: Record<string, unknown> = {}): typeof 
       const base = id.startsWith("@/")
         ? path.join(webRoot, id.slice(2))
         : path.resolve(path.dirname(file), id);
-      const resolved = [base, base + ".ts", base + ".tsx", path.join(base, "index.ts")].find(
+      const resolved = [
+        base,
+        base + ".ts",
+        base + ".tsx",
+        path.join(base, "index.ts"),
+      ].find(
         (candidate) => existsSync(candidate) && statSync(candidate).isFile(),
       );
       assert.ok(resolved, id);
       return load(resolved);
     };
-    new Function("require", "module", "exports", code)(localRequire, module, module.exports);
+    new Function("require", "module", "exports", code)(
+      localRequire,
+      module,
+      module.exports,
+    );
     return module.exports;
   }
-  return load(path.join(webRoot, "lib/hooks/use-global-search.ts")) as unknown as typeof GlobalSearch;
+  return load(
+    path.join(webRoot, "lib/hooks/use-global-search.ts"),
+  ) as unknown as typeof GlobalSearch;
 }
 
 const RATING_KEYS = ["normalized", "score", "source", "url", "value", "votes"];
 
-function searchItem(overrides: Partial<MetadataTvdbSearchItem>): MetadataTvdbSearchItem {
+function searchItem(
+  overrides: Partial<MetadataTvdbSearchItem>,
+): MetadataTvdbSearchItem {
   return {
     tvdbId: "1001",
     name: "Synthetic Title",
@@ -77,14 +99,32 @@ function searchItem(overrides: Partial<MetadataTvdbSearchItem>): MetadataTvdbSea
 test("media request input drops urql __typename from external ratings", () => {
   const { submitMediaRequestInput } = loadGlobalSearch();
   const externalRatings = [
-    { __typename: "TitleExternalRating", source: "imdb", value: 7.5, score: null, normalized: 75, votes: 1200, url: "https://ratings.example/a" },
-    { __typename: "TitleExternalRating", source: "tmdb", value: null, score: 81, normalized: 81, votes: null, url: "https://ratings.example/b" },
+    {
+      __typename: "TitleExternalRating",
+      source: "imdb",
+      value: 7.5,
+      score: null,
+      normalized: 75,
+      votes: 1200,
+      url: "https://ratings.example/a",
+    },
+    {
+      __typename: "TitleExternalRating",
+      source: "tmdb",
+      value: null,
+      score: 81,
+      normalized: 81,
+      votes: null,
+      url: "https://ratings.example/b",
+    },
   ] as unknown as MetadataTvdbSearchItem["externalRatings"];
   const input = submitMediaRequestInput(
     searchItem({
       externalRatings,
       ratingSources: ["imdb", "tmdb"],
-      externalIds: [{ __typename: "ExternalId", source: "anidb", value: "42" }] as unknown as MetadataTvdbSearchItem["externalIds"],
+      externalIds: [
+        { __typename: "ExternalId", source: "anidb", value: "42" },
+      ] as unknown as MetadataTvdbSearchItem["externalIds"],
     }),
     "ANIME",
     {
@@ -92,28 +132,42 @@ test("media request input drops urql __typename from external ratings", () => {
       requestedMonitorType: "ADVANCED",
       requestedMonitorSelection: {
         seasonNumbers: [1],
-        seriesMovies: [{
-          name: "Synthetic Movie",
-          externalIds: [{ __typename: "ExternalId", source: "tmdb", value: "7" }],
-        }],
+        seriesMovies: [
+          {
+            name: "Synthetic Movie",
+            externalIds: [
+              { __typename: "ExternalId", source: "tmdb", value: "7" },
+            ],
+          },
+        ],
       } as unknown as GlobalSearch.MetadataCatalogRequestOptions["requestedMonitorSelection"],
     },
   );
 
-  assert.ok(!JSON.stringify(input).includes("__typename"), JSON.stringify(input));
+  assert.ok(
+    !JSON.stringify(input).includes("__typename"),
+    JSON.stringify(input),
+  );
   assert.equal(input.externalRatings?.length, 2);
   for (const rating of input.externalRatings ?? []) {
     assert.deepEqual(Object.keys(rating).sort(), RATING_KEYS);
   }
   assert.deepEqual(input.externalRatings?.[1], {
-    source: "tmdb", value: null, score: 81, normalized: 81, votes: null, url: "https://ratings.example/b",
+    source: "tmdb",
+    value: null,
+    score: 81,
+    normalized: 81,
+    votes: null,
+    url: "https://ratings.example/b",
   });
   assert.deepEqual(input.ratingSources, ["imdb", "tmdb"]);
 });
 
 test("media request input leaves external ratings undefined when the result has none", () => {
   const { submitMediaRequestInput } = loadGlobalSearch();
-  const input = submitMediaRequestInput(searchItem({}), "SERIES", { libraryId: "library-1" });
+  const input = submitMediaRequestInput(searchItem({}), "SERIES", {
+    libraryId: "library-1",
+  });
   assert.equal(input.externalRatings, undefined);
   assert.ok(!("externalRatings" in JSON.parse(JSON.stringify(input))));
 });
@@ -154,10 +208,12 @@ test("a monitoring-only settings event refreshes catalog defaults without unrela
       id: "review-user",
       username: "review-user",
       appPermissions: [],
-      libraryPermissions: [{
-        libraryId: "library-1",
-        permissions: ["VIEW", "MANAGE_TITLES", "REQUEST"],
-      }],
+      libraryPermissions: [
+        {
+          libraryId: "library-1",
+          permissions: ["VIEW", "MANAGE_TITLES", "REQUEST"],
+        },
+      ],
     },
     queueFacet: "SERIES",
     uiLanguage: "eng",
@@ -165,8 +221,16 @@ test("a monitoring-only settings event refreshes catalog defaults without unrela
 
   assert.ok(onSettingsChanged, "the hook must subscribe to settings changes");
   onSettingsChanged(["appearance.theme"]);
-  assert.equal(configQueries, 0, "unrelated settings must not refetch search configuration");
+  assert.equal(
+    configQueries,
+    0,
+    "unrelated settings must not refetch search configuration",
+  );
 
   onSettingsChanged(["catalog.default_monitor_type"]);
-  assert.equal(configQueries, 1, "a monitoring-only change must reload the selected library defaults");
+  assert.equal(
+    configQueries,
+    1,
+    "a monitoring-only change must reload the selected library defaults",
+  );
 });

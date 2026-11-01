@@ -131,9 +131,7 @@ fn download_client_routing_payload(
     for (index, entry) in entries.into_iter().enumerate() {
         let client_id = entry.client_id.trim();
         if client_id.is_empty() {
-            return Err(AppError::Validation(
-                "download client routing entry requires client_id".to_string(),
-            ));
+            return Err(AppError::validation_refused(crate::error_reasons::settings::DOWNLOAD_CLIENT_ROUTING_ENTRY_REQUIRES_CLIENT_ID, "download client routing entry requires client_id".to_string()));
         }
 
         payload.insert(
@@ -204,9 +202,7 @@ fn normalize_download_client_routing_settings_entry(
 ) -> AppResult<DownloadClientRoutingSettingsEntry> {
     let client_id = entry.client_id.trim().to_string();
     if client_id.is_empty() {
-        return Err(AppError::Validation(
-            "download client routing entry requires client_id".to_string(),
-        ));
+        return Err(AppError::validation_refused(crate::error_reasons::settings::DOWNLOAD_CLIENT_ROUTING_ENTRY_REQUIRES_CLIENT_ID, "download client routing entry requires client_id".to_string()));
     }
 
     Ok(DownloadClientRoutingSettingsEntry {
@@ -227,9 +223,7 @@ fn indexer_routing_payload(
     for entry in entries {
         let indexer_id = entry.indexer_id.trim();
         if indexer_id.is_empty() {
-            return Err(AppError::Validation(
-                "indexer routing entry requires indexer_id".to_string(),
-            ));
+            return Err(AppError::validation_refused(crate::error_reasons::settings::INDEXER_ROUTING_ENTRY_REQUIRES_INDEXER_ID, "indexer routing entry requires indexer_id".to_string()));
         }
 
         let categories = entry
@@ -623,9 +617,7 @@ impl AppUseCase {
     ) -> AppResult<()> {
         let indexer_id = indexer_id.trim();
         if indexer_id.is_empty() {
-            return Err(AppError::Validation(
-                "indexer routing entry requires indexer_id".to_string(),
-            ));
+            return Err(AppError::validation_refused(crate::error_reasons::settings::INDEXER_ROUTING_ENTRY_REQUIRES_INDEXER_ID, "indexer routing entry requires indexer_id".to_string()));
         }
 
         for scope_id in ["movie", "series", "anime"] {
@@ -789,9 +781,7 @@ impl AppUseCase {
         for entry in entries {
             let indexer_id = entry.indexer_id.trim();
             if indexer_id.is_empty() {
-                return Err(AppError::Validation(
-                    "indexer routing entry requires indexer_id".to_string(),
-                ));
+                return Err(AppError::validation_refused(crate::error_reasons::settings::INDEXER_ROUTING_ENTRY_REQUIRES_INDEXER_ID, "indexer routing entry requires indexer_id".to_string()));
             }
 
             let categories = entry
